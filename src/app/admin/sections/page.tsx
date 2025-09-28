@@ -6,15 +6,7 @@ import { useRouter } from "next/navigation";
 import AdminNav from "@/components/AdminNav";
 
 export default function AdminSections() {
-  const router = useRouter();
-
-  const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn");
-    router.push("/");
-  };
-
   
-
   return (
     <AdminLayout>
       <div className="px-6">

@@ -3,8 +3,8 @@ import type { Config } from "drizzle-kit";
 export default {
   schema: "./src/db/schema.ts",
   out: "./drizzle",
-  dialect: "sqlite",               // ✅ et non "driver"
+  dialect: "sqlite",
   dbCredentials: {
-    url: "sqlite.db",
+    url: process.env.DATABASE_URL ?? "file:./sqlite.db",
   },
 } satisfies Config;
