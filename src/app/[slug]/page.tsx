@@ -9,6 +9,15 @@ import ListLayout from "@/components/layouts/ListLayout";
 import ActivitiesLayout from "@/components/layouts/ActivitiesLayout";
 import CardsLayout from "@/components/layouts/CardsLayout";
 
+// Ton type Item attendu par les layouts
+type Item = {
+  id: number;
+  title: string;
+  content?: string;
+  date?: string;   // ✅ string (ISO)
+  extra?: string;
+};
+
 export default function SectionPage({ params }: { params: { slug: string } }) {
   const section = db
     .select()
@@ -18,11 +27,21 @@ export default function SectionPage({ params }: { params: { slug: string } }) {
 
   if (!section) return notFound();
 
-  const content = db
+  // Récupération brute des items
+  const rawItems = db
     .select()
     .from(items)
     .where(eq(items.sectionId, section.id))
     .all();
+
+  // Mapping vers ton type Item (conversion Date → string ISO)
+  const content: Item[] = rawItems.map((it) => ({
+    id: it.id,
+    title: it.title,
+    content: it.content ?? undefined,
+    date: it.date ? new Date(it.date).toISOString() : undefined,  // ✅ conversion ici
+    extra: it.extra ?? undefined,
+  }));
 
   return (
     <main className="p-6 max-w-5xl mx-auto">
