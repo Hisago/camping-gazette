@@ -10,13 +10,7 @@ import CardsLayout from "@/components/layouts/CardsLayout";
 
 import { Item } from "@/types"; 
 
-type SectionPageProps = {
-  params: {
-    slug: string;
-  };
-};
-
-export default function SectionPage({ params }: SectionPageProps) {
+export default function SectionPage({ params }: { params: { slug: string } }) {
   const section = db
     .select()
     .from(sections)
