@@ -8,8 +8,9 @@ import ListLayout from "@/components/layouts/ListLayout";
 import ActivitiesLayout from "@/components/layouts/ActivitiesLayout";
 import CardsLayout from "@/components/layouts/CardsLayout";
 
-import { Item } from "@/types"; // ✅ import centralisé
+import { Item } from "@/types"; 
 
+// ✅ On tape explicitement params ici
 export default function SectionPage({ params }: { params: { slug: string } }) {
   const section = db
     .select()
