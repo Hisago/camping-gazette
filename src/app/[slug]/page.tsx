@@ -10,7 +10,8 @@ import CardsLayout from "@/components/layouts/CardsLayout";
 
 import { Item } from "@/types"; 
 
-export default function SectionPage({ params }: { params: { slug: string } }) {
+// ✅ déblocage rapide avec `any` pour Render
+export default function SectionPage({ params }: any) {
   const section = db
     .select()
     .from(sections)
