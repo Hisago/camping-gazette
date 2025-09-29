@@ -25,10 +25,9 @@ export async function POST(req: Request) {
       .values({ name, slug })
       .returning();
 
-    return NextResponse.json(inserted[0], { status: 201 });
-  } catch (err: any) {
-    console.error("Erreur POST /api/categories", err);
+    return NextResponse.json(inserted[0], { status: 201 }); // ✅ premier élément
+  } catch (err) {
+    console.error("❌ Erreur POST /api/categories", err);
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
 }
-

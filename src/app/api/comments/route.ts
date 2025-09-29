@@ -13,11 +13,15 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const body = await req.json();
+
   if (!body.author || !body.message) {
-    return NextResponse.json({ error: "Champs requis manquants" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Champs requis manquants" },
+      { status: 400 }
+    );
   }
 
-  const [inserted] = await db
+  const inserted = await db
     .insert(comments)
     .values({
       author: body.author,
@@ -26,5 +30,5 @@ export async function POST(req: Request) {
     })
     .returning();
 
-  return NextResponse.json(inserted);
+  return NextResponse.json(inserted[0]); // ✅ premier élément du tableau
 }

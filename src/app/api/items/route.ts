@@ -60,7 +60,7 @@ export async function POST(req: Request) {
     })
     .returning();
 
-  return NextResponse.json(result[0]); // drizzle renvoie un tableau
+  return NextResponse.json(result[0]); // ✅ premier élément
 }
 
 // DELETE → supprimer un item

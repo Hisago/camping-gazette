@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { sections, items } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import type { RouteContext } from "@/types/next"; // ✅ notre type global
 
 function toSlug(str: string) {
   return str
@@ -12,10 +13,7 @@ function toSlug(str: string) {
     .replace(/(^-|-$)+/g, "");
 }
 
-export async function PUT(
-  req: Request,
-  context: { params: { id: string } } // ✅ params n'est PAS une Promise
-) {
+export async function PUT(req: Request, context: RouteContext<{ id: string }>) {
   const { id } = context.params;
   const body = await req.json();
 
@@ -40,8 +38,7 @@ export async function PUT(
 
     console.log("✅ UPDATE result", result);
 
-    // returning() renvoie un tableau → on prend le premier
-    return NextResponse.json(result[0]);
+    return NextResponse.json(result[0]); // ✅ drizzle renvoie un tableau
   } catch (error) {
     console.error("❌ Erreur PUT /api/sections/[id]:", error);
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
@@ -50,7 +47,7 @@ export async function PUT(
 
 export async function DELETE(
   _req: Request,
-  context: { params: { id: string } } // ✅ idem ici
+  context: RouteContext<{ id: string }>
 ) {
   const { id } = context.params;
 
