@@ -2,15 +2,11 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { categories } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import type { RouteContext } from "@/types/next"; // ✅ import du type global
 
 // PATCH /api/categories/[id]
-export async function PATCH(
-  req: Request,
-  context: RouteContext<{ id: string }>
-) {
+export async function PATCH(req: Request, context: any) {
   try {
-    const { id } = context.params; // ✅ plus besoin de await
+    const { id } = context.params as { id: string }; // ✅ cast manuel
     const { order } = await req.json();
 
     await db
