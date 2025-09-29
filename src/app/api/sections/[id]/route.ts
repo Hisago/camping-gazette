@@ -2,7 +2,6 @@ import { db } from "@/db";
 import { sections, items } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
-import type { RouteContext } from "@/types/next"; // ✅ notre type global
 
 function toSlug(str: string) {
   return str
@@ -13,14 +12,14 @@ function toSlug(str: string) {
     .replace(/(^-|-$)+/g, "");
 }
 
-export async function PUT(req: Request, context: RouteContext<{ id: string }>) {
-  const { id } = context.params;
+export async function PUT(req: Request, context: any) {
+  const { id } = context.params as { id: string };
   const body = await req.json();
 
   console.log("➡️ PUT sections", { id, body });
 
   try {
-    const updateData: any = {};
+    const updateData: Record<string, any> = {};
 
     if (body.name) {
       updateData.name = body.name;
@@ -38,18 +37,15 @@ export async function PUT(req: Request, context: RouteContext<{ id: string }>) {
 
     console.log("✅ UPDATE result", result);
 
-    return NextResponse.json(result[0]); // ✅ drizzle renvoie un tableau
+    return NextResponse.json(result[0]);
   } catch (error) {
     console.error("❌ Erreur PUT /api/sections/[id]:", error);
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  _req: Request,
-  context: RouteContext<{ id: string }>
-) {
-  const { id } = context.params;
+export async function DELETE(_req: Request, context: any) {
+  const { id } = context.params as { id: string };
 
   try {
     // Supprimer les items liés
