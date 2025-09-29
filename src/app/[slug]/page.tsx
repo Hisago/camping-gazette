@@ -9,9 +9,9 @@ import ActivitiesLayout from "@/components/layouts/ActivitiesLayout";
 import CardsLayout from "@/components/layouts/CardsLayout";
 
 import { Item } from "@/types";
-import type { PageParams } from "@/types/next";
+import type { NextPageParams } from "@/types/next";
 
-export default async function SectionPage({ params }: PageParams<{ slug: string }>) {
+export default async function SectionPage({ params }: NextPageParams<{ slug: string }>) {
   // ✅ Récupérer une seule section
   const section = await db.query.sections.findFirst({
     where: eq(sections.slug, params.slug),
@@ -19,12 +19,10 @@ export default async function SectionPage({ params }: PageParams<{ slug: string 
 
   if (!section) return notFound();
 
-  // ✅ Récupérer les items liés
   const rawItems = await db.query.items.findMany({
     where: eq(items.sectionId, section.id),
   });
 
-  // ✅ Transformation propre
   const content: Item[] = rawItems.map((it) => ({
     id: it.id,
     title: it.title,
