@@ -9,10 +9,12 @@ import ActivitiesLayout from "@/components/layouts/ActivitiesLayout";
 import CardsLayout from "@/components/layouts/CardsLayout";
 
 import { Item } from "@/types";
-import type { NextPageParams } from "@/types/next";
 
-export default async function SectionPage({ params }: NextPageParams<{ slug: string }>) {
-  // ✅ Récupérer une seule section
+type SectionPageProps = {
+  params: { slug: string };
+};
+
+export default async function SectionPage({ params }: SectionPageProps) {
   const section = await db.query.sections.findFirst({
     where: eq(sections.slug, params.slug),
   });
