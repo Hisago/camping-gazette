@@ -1,10 +1,4 @@
-const categoryIcons: Record<string, string> = {
-  Entrées: "🥗",
-  Plats: "🍽️",
-  Desserts: "🍰",
-  Boissons: "🥤",
-  divers: "✨",
-};
+"use client";
 
 function formatPrice(extra?: string | null) {
   if (!extra) return "";
@@ -14,7 +8,7 @@ function formatPrice(extra?: string | null) {
 
 export default function MenuLayout({ items }: { items: any[] }) {
   const grouped = items.reduce((acc: Record<string, any[]>, item) => {
-    const cat = item.category ?? "divers";
+    const cat = item.category?.trim() || "Divers";
     if (!acc[cat]) acc[cat] = [];
     acc[cat].push(item);
     return acc;
@@ -25,10 +19,8 @@ export default function MenuLayout({ items }: { items: any[] }) {
       {Object.entries(grouped).map(([category, items]) => (
         <section key={category}>
           <h2 className="text-2xl md:text-3xl font-extrabold text-center mb-6 flex items-center justify-center gap-2">
-            <span className="text-3xl md:text-4xl">
-              {categoryIcons[category] || "🍽️"}
-            </span>
-            <span className="capitalize">{category}</span>
+            {/* ✅ L’admin peut mettre l’emoji directement dans category */}
+            <span>{category}</span>
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">

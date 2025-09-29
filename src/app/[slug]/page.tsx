@@ -18,6 +18,9 @@ export default function SectionPage({ params }: any) {
     .where(eq(sections.slug, params.slug))
     .get();
 
+  console.log("👉 params.slug =", params.slug);
+  console.log("👉 section trouvé =", section);
+
   if (!section) return notFound();
 
   const rawItems = db
@@ -26,13 +29,16 @@ export default function SectionPage({ params }: any) {
     .where(eq(items.sectionId, section.id))
     .all();
 
-  const content: Item[] = rawItems.map((it) => ({
-    id: it.id,
-    title: it.title,
-    content: it.content ?? undefined,
-    date: it.date ? new Date(it.date).toISOString() : undefined,
-    extra: it.extra ?? undefined,
-  }));
+  console.log("👉 items trouvés =", rawItems);
+
+ const content: Item[] = rawItems.map((it) => ({
+  id: it.id,
+  title: it.title,
+  content: it.content ?? undefined,
+  date: it.date ? new Date(it.date).toISOString() : undefined,
+  extra: it.extra ?? undefined,
+  category: it.category ?? undefined,   // ✅ on n’oublie plus la catégorie
+}));
 
   return (
     <main className="p-6 max-w-5xl mx-auto">

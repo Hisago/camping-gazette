@@ -33,6 +33,8 @@ export const categories = sqliteTable("categories", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),   // Nom affiché (Entrées, Plats, etc.)
   slug: text("slug").notNull().unique(), // Identifiant
+  order: integer("order").notNull().default(0), // ⚠️ appelé "order" ici
+
 });
 
 export const comments = sqliteTable("comments", {
