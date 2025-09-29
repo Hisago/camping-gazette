@@ -8,37 +8,35 @@ import ListLayout from "@/components/layouts/ListLayout";
 import ActivitiesLayout from "@/components/layouts/ActivitiesLayout";
 import CardsLayout from "@/components/layouts/CardsLayout";
 
-import { Item } from "@/types"; 
+import { Item } from "@/types";
 
-// ✅ déblocage rapide avec `any` pour Render
-export default function SectionPage({ params }: any) {
-  const section = db
-    .select()
-    .from(sections)
-    .where(eq(sections.slug, params.slug))
-    .get();
+export default async function SectionPage({ params }: { params: { slug: string } }) {
+  // ✅ Récupérer une seule section
+  const section = await db.query.sections.findFirst({
+    where: eq(sections.slug, params.slug),
+  });
 
   console.log("👉 params.slug =", params.slug);
   console.log("👉 section trouvé =", section);
 
   if (!section) return notFound();
 
-  const rawItems = db
-    .select()
-    .from(items)
-    .where(eq(items.sectionId, section.id))
-    .all();
+  // ✅ Récupérer les items liés
+  const rawItems = await db.query.items.findMany({
+    where: eq(items.sectionId, section.id),
+  });
 
   console.log("👉 items trouvés =", rawItems);
 
- const content: Item[] = rawItems.map((it) => ({
-  id: it.id,
-  title: it.title,
-  content: it.content ?? undefined,
-  date: it.date ? new Date(it.date).toISOString() : undefined,
-  extra: it.extra ?? undefined,
-  category: it.category ?? undefined,   // ✅ on n’oublie plus la catégorie
-}));
+  // ✅ Transformation propre
+  const content: Item[] = rawItems.map((it) => ({
+    id: it.id,
+    title: it.title,
+    content: it.content ?? undefined,
+    date: it.date ? new Date(it.date).toISOString() : undefined,
+    extra: it.extra ?? undefined,
+    category: it.category ?? undefined,
+  }));
 
   return (
     <main className="p-6 max-w-5xl mx-auto">

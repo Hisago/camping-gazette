@@ -1,9 +1,19 @@
-import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import * as schema from "./schema";
+import { config } from "dotenv";
+config({ path: ".env.local" }); // ✅ charge .env.local
 
-// connexion à SQLite
-const sqlite = new Database("sqlite.db");
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
+import * as schema from "./schema.ts";
 
-// on exporte drizzle avec le schéma
-export const db = drizzle(sqlite, { schema });
+if (!process.env.DATABASE_URL) {
+  throw new Error("❌ DATABASE_URL is not defined");
+}
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
+});
+
+export const db = drizzle(pool, { schema });
