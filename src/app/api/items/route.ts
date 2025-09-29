@@ -6,7 +6,7 @@ import { eq, desc } from "drizzle-orm";
 // petit helper robuste
 function toDate(val: unknown) {
   if (!val) return null;
-  const d = new Date(String(val)); // accepte "2025-07-25T10:00", "2025-07-25T10:00:00", number...
+  const d = new Date(String(val));
   return isNaN(d.getTime()) ? null : d;
 }
 
@@ -17,27 +17,25 @@ export async function GET(req: Request) {
 
   if (sectionId) {
     // on regarde le type de la section pour savoir si on trie par date
-    const section = db
-      .select()
-      .from(sections)
-      .where(eq(sections.id, Number(sectionId)))
-      .get();
+    const section = await db.query.sections.findFirst({
+      where: eq(sections.id, Number(sectionId)),
+    });
 
-    const q = db
+    const baseQuery = db
       .select()
       .from(items)
       .where(eq(items.sectionId, Number(sectionId)));
 
     const all =
       section?.type === "activities" || section?.type === "list"
-        ? q.orderBy(desc(items.date)).all()
-        : q.all();
+        ? await baseQuery.orderBy(desc(items.date))
+        : await baseQuery;
 
     return NextResponse.json(all);
   }
 
   // si pas de sectionId, renvoie tout (pas de tri global par défaut)
-  const all = db.select().from(items).all();
+  const all = await db.select().from(items);
   return NextResponse.json(all);
 }
 
@@ -57,21 +55,17 @@ export async function POST(req: Request) {
       title: body.title,
       content: body.content ?? null,
       extra: body.extra ?? null,
-      date: finalDate, // ✅ toujours une Date
+      date: finalDate,
       category: body.category ?? null,
     })
-    .returning()
-    .get();
+    .returning();
 
-  return NextResponse.json(result);
+  return NextResponse.json(result[0]); // drizzle renvoie un tableau
 }
-
-// (si tu as un PUT /api/items/[id], fais pareil : toDate(body.date))
-// DELETE : inchangé
 
 // DELETE → supprimer un item
 export async function DELETE(req: Request) {
   const body = await req.json();
-  db.delete(items).where(eq(items.id, body.id)).run();
+  await db.delete(items).where(eq(items.id, body.id));
   return NextResponse.json({ success: true });
 }

@@ -12,12 +12,11 @@ function toSlug(str: string) {
     .replace(/(^-|-$)+/g, "");
 }
 
-
 export async function PUT(
   req: Request,
-  context: { params: Promise<{ id: string }> }
+  context: { params: { id: string } } // ✅ params n'est PAS une Promise
 ) {
-  const { id } = await context.params;
+  const { id } = context.params;
   const body = await req.json();
 
   console.log("➡️ PUT sections", { id, body });
@@ -37,24 +36,23 @@ export async function PUT(
       .update(sections)
       .set(updateData)
       .where(eq(sections.id, Number(id)))
-      .returning()
-      .get();
+      .returning();
 
     console.log("✅ UPDATE result", result);
 
-    return NextResponse.json(result);
+    // returning() renvoie un tableau → on prend le premier
+    return NextResponse.json(result[0]);
   } catch (error) {
     console.error("❌ Erreur PUT /api/sections/[id]:", error);
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
 }
 
-
 export async function DELETE(
   _req: Request,
-  context: { params: Promise<{ id: string }> }
+  context: { params: { id: string } } // ✅ idem ici
 ) {
-  const { id } = await context.params;
+  const { id } = context.params;
 
   try {
     // Supprimer les items liés
@@ -65,7 +63,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Erreur DELETE section:", error);
+    console.error("❌ Erreur DELETE section:", error);
     return NextResponse.json({ error: "Erreur suppression" }, { status: 500 });
   }
 }
