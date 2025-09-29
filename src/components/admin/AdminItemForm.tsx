@@ -2,6 +2,39 @@
 
 import EmojiPicker from "./EmojiPicker";
 
+type Category = {
+  id: number;
+  name: string;
+  slug: string;
+  order: number;
+};
+
+type Props = {
+  idEditing: number | null;
+  title: string;
+  content: string;
+  extra: string;
+  date: string;
+  category: string;
+  newCategory: string;
+  setTitle: (val: string) => void;
+  setContent: (val: string) => void;
+  setExtra: (val: string) => void;
+  setDate: (val: string) => void;
+  setCategory: (val: string) => void;
+  setCategories: React.Dispatch<React.SetStateAction<Category[]>>;
+  setNewCategory: (val: string) => void;
+  handleSave: () => void;
+  resetForm: () => void;
+  currentSection: { type: string };
+  categories: Category[];
+  registerField: (
+    el: HTMLInputElement | HTMLTextAreaElement | null,
+    name: string
+  ) => void;
+  insertEmojiAtCursor: (emoji: string) => void;
+};
+
 export default function AdminItemForm({
   idEditing,
   title,
@@ -23,7 +56,7 @@ export default function AdminItemForm({
   categories,
   registerField,
   insertEmojiAtCursor,
-}: any) {
+}: Props) {
   return (
     <div className="bg-white p-6 rounded-lg shadow mb-8 space-y-4">
       <h2 className="text-lg font-semibold mb-2">
@@ -54,59 +87,62 @@ export default function AdminItemForm({
             >
               <option value="">-- Choisir --</option>
               {categories
-                .sort((a: any, b: any) => a.order - b.order) // ✅ tri par order
-                .map((c: any) => (
+                .sort((a, b) => a.order - b.order)
+                .map((c) => (
                   <option key={c.id} value={c.name}>
                     {c.name}
                   </option>
                 ))}
             </select>
           </div>
-          <div className="mt-6">
-  <h3 className="font-semibold mb-2">📂 Ordre des catégories du menu</h3>
-  <ul className="space-y-2">
-    {categories
-      .sort((a, b) => a.order - b.order)
-      .map((c, idx) => (
-        <li key={c.id} className="flex items-center gap-2">
-          <span className="flex-1">{c.name}</span>
-          <button
-            onClick={async () => {
-              const newOrder = c.order - 1;
-              await fetch(`/api/categories/${c.id}`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ order: newOrder }),
-              });
-              const updated = await fetch("/api/categories").then((r) => r.json());
-              setCategories(updated);
-            }}
-            disabled={idx === 0}
-            className="px-2 py-1 text-sm bg-gray-200 rounded disabled:opacity-50"
-          >
-            ⬆️
-          </button>
-          <button
-            onClick={async () => {
-              const newOrder = c.order + 1;
-              await fetch(`/api/categories/${c.id}`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ order: newOrder }),
-              });
-              const updated = await fetch("/api/categories").then((r) => r.json());
-              setCategories(updated);
-            }}
-            disabled={idx === categories.length - 1}
-            className="px-2 py-1 text-sm bg-gray-200 rounded disabled:opacity-50"
-          >
-            ⬇️
-          </button>
-        </li>
-      ))}
-  </ul>
-</div>
 
+          {/* Tri des catégories */}
+          <div className="mt-6">
+            <h3 className="font-semibold mb-2">📂 Ordre des catégories</h3>
+            <ul className="space-y-2">
+              {categories
+                .sort((a, b) => a.order - b.order)
+                .map((c, idx) => (
+                  <li key={c.id} className="flex items-center gap-2">
+                    <span className="flex-1">{c.name}</span>
+                    <button
+                      onClick={async () => {
+                        await fetch(`/api/categories/${c.id}`, {
+                          method: "PATCH",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ order: c.order - 1 }),
+                        });
+                        const updated = await fetch("/api/categories").then((r) =>
+                          r.json()
+                        );
+                        setCategories(updated);
+                      }}
+                      disabled={idx === 0}
+                      className="px-2 py-1 text-sm bg-gray-200 rounded disabled:opacity-50"
+                    >
+                      ⬆️
+                    </button>
+                    <button
+                      onClick={async () => {
+                        await fetch(`/api/categories/${c.id}`, {
+                          method: "PATCH",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ order: c.order + 1 }),
+                        });
+                        const updated = await fetch("/api/categories").then((r) =>
+                          r.json()
+                        );
+                        setCategories(updated);
+                      }}
+                      disabled={idx === categories.length - 1}
+                      className="px-2 py-1 text-sm bg-gray-200 rounded disabled:opacity-50"
+                    >
+                      ⬇️
+                    </button>
+                  </li>
+                ))}
+            </ul>
+          </div>
 
           {/* Création catégorie */}
           <div className="mt-4 p-3 border rounded bg-gray-50">
@@ -132,7 +168,7 @@ export default function AdminItemForm({
                       .toLowerCase()
                       .replace(/\s+/g, "-")
                       .replace(/[^\w-]/g, ""),
-                    order: categories.length + 1, // ✅ ordre automatique
+                    order: categories.length + 1,
                   };
                   await fetch("/api/categories", {
                     method: "POST",
@@ -142,6 +178,7 @@ export default function AdminItemForm({
                   const updated = await fetch("/api/categories").then((res) =>
                     res.json()
                   );
+                  setCategories(updated); // ✅ fix manquant
                   setCategory(payload.name);
                   setNewCategory("");
                 }}
