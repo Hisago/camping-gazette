@@ -1,5 +1,3 @@
-import ServerNavbar from "@/components/ServerNavbar";
-
 // components/Layout.tsx
 import Navbar from "@/components/NavbarClient";
 
