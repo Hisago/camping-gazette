@@ -10,7 +10,7 @@ import CardsLayout from "@/components/layouts/CardsLayout";
 
 import { Item } from "@/types";
 
-export default async function SectionPage({ params }: { params: { slug: string } }) {
+export default async function SectionPage({ params }: any) {
   const section = await db.query.sections.findFirst({
     where: eq(sections.slug, params.slug),
   });
