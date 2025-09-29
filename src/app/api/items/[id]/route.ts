@@ -2,24 +2,18 @@ import { db } from "@/db";
 import { items } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
-import type { RouteContext } from "@/types/next";
 
-export async function PUT(req: Request, context: RouteContext<{ id: string }>) {
+export async function PUT(req: Request, context: { params: { id: string } }) {
   const { id } = context.params;
   const body = await req.json();
 
-  console.log("➡️ [PUT /api/items/[id]] id:", id);
-  console.log("➡️ Body reçu:", JSON.stringify(body));
-
   try {
-    // Lire avant modification (utile pour debug)
     const before = await db.query.items.findFirst({
       where: eq(items.id, Number(id)),
     });
-    console.log("📦 En DB AVANT update:", before);
+    console.log("📦 AVANT update:", before);
 
     const updateData: Record<string, any> = {};
-
     if (body.title !== undefined) updateData.title = body.title;
     if (body.content !== undefined) updateData.content = body.content;
     if (body.extra !== undefined) updateData.extra = body.extra;
@@ -32,18 +26,13 @@ export async function PUT(req: Request, context: RouteContext<{ id: string }>) {
       }
     }
 
-    console.log("➡️ updateData construit:", JSON.stringify(updateData));
-
-    // Faire l'update et récupérer le nouvel enregistrement
     const updated = await db
       .update(items)
       .set(updateData)
       .where(eq(items.id, Number(id)))
       .returning();
 
-    console.log("✅ Résultat UPDATE:", updated);
-
-    return NextResponse.json(updated[0]); // ✅ premier élément
+    return NextResponse.json(updated[0]);
   } catch (error) {
     console.error("❌ Erreur PUT /api/items/[id]:", error, "body:", body);
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
@@ -52,7 +41,7 @@ export async function PUT(req: Request, context: RouteContext<{ id: string }>) {
 
 export async function DELETE(
   _req: Request,
-  context: RouteContext<{ id: string }>
+  context: { params: { id: string } }
 ) {
   const { id } = context.params;
 

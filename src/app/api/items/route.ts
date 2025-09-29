@@ -1,55 +1,70 @@
 import { db } from "@/db";
-import { items } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { items, sections } from "@/db/schema";
 import { NextResponse } from "next/server";
+import { eq, desc } from "drizzle-orm";
 
-export async function PUT(req: Request, context: { params: { id: string } }) {
-  const { id } = context.params;
-  const body = await req.json();
-
-  try {
-    const before = await db.query.items.findFirst({
-      where: eq(items.id, Number(id)),
-    });
-    console.log("📦 AVANT update:", before);
-
-    const updateData: Record<string, any> = {};
-    if (body.title !== undefined) updateData.title = body.title;
-    if (body.content !== undefined) updateData.content = body.content;
-    if (body.extra !== undefined) updateData.extra = body.extra;
-    if (body.category !== undefined) updateData.category = body.category;
-
-    if (body.date) {
-      const parsed = new Date(body.date);
-      if (!isNaN(parsed.getTime())) {
-        updateData.date = parsed;
-      }
-    }
-
-    const updated = await db
-      .update(items)
-      .set(updateData)
-      .where(eq(items.id, Number(id)))
-      .returning();
-
-    return NextResponse.json(updated[0]);
-  } catch (error) {
-    console.error("❌ Erreur PUT /api/items/[id]:", error, "body:", body);
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
-  }
+// petit helper robuste pour parser les dates
+function toDate(val: unknown) {
+  if (!val) return null;
+  const d = new Date(String(val));
+  return isNaN(d.getTime()) ? null : d;
 }
 
-export async function DELETE(
-  _req: Request,
-  context: { params: { id: string } }
-) {
-  const { id } = context.params;
+// GET → tri par date seulement pour activities & list (gazette)
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const sectionId = searchParams.get("sectionId");
 
-  try {
-    await db.delete(items).where(eq(items.id, Number(id)));
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("❌ Erreur DELETE /api/items/[id]:", error);
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+  if (sectionId) {
+    const section = await db.query.sections.findFirst({
+      where: eq(sections.id, Number(sectionId)),
+    });
+
+    const baseQuery = db
+      .select()
+      .from(items)
+      .where(eq(items.sectionId, Number(sectionId)));
+
+    const all =
+      section?.type === "activities" || section?.type === "list"
+        ? await baseQuery.orderBy(desc(items.date))
+        : await baseQuery;
+
+    return NextResponse.json(all);
   }
+
+  // si pas de sectionId, renvoie tout
+  const all = await db.select().from(items);
+  return NextResponse.json(all);
+}
+
+export async function POST(req: Request) {
+  const body = await req.json();
+
+  // Si pas de date → on met la date du jour
+  let finalDate = toDate(body.date);
+  if (!finalDate) {
+    finalDate = new Date();
+  }
+
+  const result = await db
+    .insert(items)
+    .values({
+      sectionId: body.sectionId,
+      title: body.title,
+      content: body.content ?? null,
+      extra: body.extra ?? null,
+      date: finalDate,
+      category: body.category ?? null,
+    })
+    .returning();
+
+  return NextResponse.json(result[0]); // ✅ premier élément
+}
+
+// DELETE → supprimer un item
+export async function DELETE(req: Request) {
+  const body = await req.json();
+  await db.delete(items).where(eq(items.id, body.id));
+  return NextResponse.json({ success: true });
 }
