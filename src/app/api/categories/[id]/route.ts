@@ -3,17 +3,19 @@ import { db } from "@/db";
 import { categories } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
+// PATCH /api/categories/[id]
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> } // 👈 typage attendu
 ) {
   try {
+    const { id } = await context.params; // ⚡ déstructure via `await`
     const { order } = await req.json();
 
     await db
       .update(categories)
       .set({ order })
-      .where(eq(categories.id, Number(params.id)));
+      .where(eq(categories.id, Number(id)));
 
     return NextResponse.json({ success: true });
   } catch (err) {
