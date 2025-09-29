@@ -7,14 +7,11 @@ export async function PUT(req: Request, context: any) {
   const { id } = context.params as { id: string };
   const body = await req.json();
 
-  console.log("➡️ [PUT /api/items/[id]] id:", id);
-  console.log("➡️ Body reçu:", JSON.stringify(body));
-
   try {
     const before = await db.query.items.findFirst({
       where: eq(items.id, Number(id)),
     });
-    console.log("📦 En DB AVANT update:", before);
+    console.log("📦 AVANT update:", before);
 
     const updateData: Record<string, any> = {};
     if (body.title !== undefined) updateData.title = body.title;
@@ -29,15 +26,11 @@ export async function PUT(req: Request, context: any) {
       }
     }
 
-    console.log("➡️ updateData construit:", JSON.stringify(updateData));
-
     const updated = await db
       .update(items)
       .set(updateData)
       .where(eq(items.id, Number(id)))
       .returning();
-
-    console.log("✅ Résultat UPDATE:", updated);
 
     return NextResponse.json(updated[0]);
   } catch (error) {
