@@ -3,8 +3,8 @@ import { items } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
-export async function PUT(req: Request, context: { params: { id: string } }) {
-  const { id } = context.params;
+export async function PUT(req: Request, context: any) {
+  const { id } = context.params as { id: string };
   const body = await req.json();
 
   try {
@@ -39,11 +39,8 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
   }
 }
 
-export async function DELETE(
-  _req: Request,
-  context: { params: { id: string } }
-) {
-  const { id } = context.params;
+export async function DELETE(_req: Request, context: any) {
+  const { id } = context.params as { id: string };
 
   try {
     await db.delete(items).where(eq(items.id, Number(id)));
