@@ -18,12 +18,18 @@ export default function Navbar() {
   const [sections, setSections] = useState<Section[]>([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Charger les sections
+  // Charger les sections + écouter les updates
   useEffect(() => {
-    fetch("/api/sections")
-      .then((res) => res.json())
-      .then(setSections)
-      .catch((err) => console.error("Erreur fetch sections:", err));
+    const loadSections = () =>
+      fetch("/api/sections")
+        .then((res) => res.json())
+        .then(setSections)
+        .catch((err) => console.error("Erreur fetch sections:", err));
+
+    loadSections();
+
+    window.addEventListener("sectionsUpdated", loadSections);
+    return () => window.removeEventListener("sectionsUpdated", loadSections);
   }, []);
 
   // Gestion login/logout
@@ -49,7 +55,6 @@ export default function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 shadow bg-green-700">
-      {/* Barre principale */}
       <div className="flex items-center justify-between h-14 px-4 w-full">
         {/* Gauche : Logo */}
         <Link href="/" className="text-white font-bold text-xl">
@@ -58,23 +63,23 @@ export default function Navbar() {
 
         {/* Centre : Sections */}
         <div className="hidden md:flex flex-1 justify-center gap-4 overflow-x-auto whitespace-nowrap">
-  {sections.map(({ slug, name }) => {
-    const active = pathname.startsWith(`/${slug}`);
-    return (
-      <Link
-        key={slug}
-        href={`/${slug}`}
-        className={`px-3 py-1.5 rounded-md text-base font-medium transition ${
-          active
-            ? "bg-white text-green-700 shadow-sm"
-            : "text-white hover:bg-green-800"
-        }`}
-      >
-        {name}
-      </Link>
-    );
-  })}
-</div>
+          {sections.map(({ slug, name }) => {
+            const active = pathname.startsWith(`/${slug}`);
+            return (
+              <Link
+                key={slug}
+                href={`/${slug}`}
+                className={`px-3 py-1.5 rounded-md text-base font-medium transition ${
+                  active
+                    ? "bg-white text-green-700 shadow-sm"
+                    : "text-white hover:bg-green-800"
+                }`}
+              >
+                {name}
+              </Link>
+            );
+          })}
+        </div>
 
         {/* Droite : Connexion / Déconnexion + Admin */}
         <div className="flex items-center gap-2">

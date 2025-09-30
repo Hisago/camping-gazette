@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import EmojiPicker from "@/components/admin/EmojiPicker";
-import SectionPreview from "@/components/admin/SectionPreview";
 
 type Section = {
   id: number;
@@ -28,10 +27,8 @@ export default function AdminSectionsPage() {
   const [name, setName] = useState("");
   const [type, setType] = useState("list");
 
-  // Champ texte actuellement actif
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  // Charger les sections
   const loadSections = async () => {
     const res = await fetch("/api/sections");
     const data = await res.json();
@@ -52,8 +49,8 @@ export default function AdminSectionsPage() {
     if (!name.trim()) return;
 
     const payload = {
-      name, // conserve les emojis
-      slug: toSlug(name), // slug sans emoji
+      name,
+      slug: toSlug(name),
       type,
     };
 
@@ -73,15 +70,16 @@ export default function AdminSectionsPage() {
 
     await loadSections();
     resetForm();
+    window.dispatchEvent(new Event("sectionsUpdated")); // ✅ notifier la navbar
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm("Voulez-vous vraiment supprimer cette partie ?")) return;
     await fetch(`/api/sections/${id}`, { method: "DELETE" });
     setSections(sections.filter((s) => s.id !== id));
+    window.dispatchEvent(new Event("sectionsUpdated")); // ✅ notifier la navbar
   };
 
-  // Insertion d’emoji au curseur
   const insertEmojiAtCursor = (emoji: string) => {
     const input = inputRef.current;
     if (!input) return;
@@ -89,12 +87,10 @@ export default function AdminSectionsPage() {
     const start = input.selectionStart || 0;
     const end = input.selectionEnd || 0;
 
-    const newValue =
-      name.slice(0, start) + emoji + name.slice(end);
+    const newValue = name.slice(0, start) + emoji + name.slice(end);
 
     setName(newValue);
 
-    // repositionner le curseur
     requestAnimationFrame(() => {
       input.setSelectionRange(start + emoji.length, start + emoji.length);
       input.focus();
@@ -103,12 +99,16 @@ export default function AdminSectionsPage() {
 
   return (
     <main className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">⚙️ Gestion des parties du site</h1>
+      <h1 className="text-2xl font-bold mb-6">
+        ⚙️ Gestion des parties du site
+      </h1>
 
       {/* Formulaire */}
       <div className="bg-white p-6 rounded-lg shadow mb-8 space-y-4">
         <h2 className="text-lg font-semibold">
-          {idEditing ? "✏️ Modifier une partie" : "➕ Ajouter une nouvelle partie"}
+          {idEditing
+            ? "✏️ Modifier une partie"
+            : "➕ Ajouter une nouvelle partie"}
         </h2>
 
         <div className="flex flex-col md:flex-row gap-3">
@@ -123,7 +123,8 @@ export default function AdminSectionsPage() {
               onChange={(e) => setName(e.target.value)}
             />
             <p className="text-xs text-gray-500 mt-1">
-              Tu peux ajouter un emoji directement (ex: 🎉 Activités, 📰 Gazette).
+              Tu peux ajouter un emoji directement (ex: 🎉 Activités, 📰
+              Gazette).
             </p>
             <div className="mt-2">
               <EmojiPicker onSelect={insertEmojiAtCursor} />
@@ -142,7 +143,6 @@ export default function AdminSectionsPage() {
               <option value="activities">Activités</option>
               <option value="cards">Cartes</option>
             </select>
-              <SectionPreview type={type} />
           </div>
         </div>
 
@@ -193,13 +193,13 @@ export default function AdminSectionsPage() {
                       setName(s.name);
                       setType(s.type);
                     }}
-                    className="flex items-center gap-1 px-2 py-1 text-xs bg-green-100 text-green-700 border border-green-300 rounded hover:bg-green-200"
+                    className="px-2 py-1 text-xs bg-green-100 text-green-700 border border-green-300 rounded hover:bg-green-200"
                   >
                     ✏️ Modifier
                   </button>
                   <button
                     onClick={() => handleDelete(s.id)}
-                    className="flex items-center gap-1 px-2 py-1 text-xs bg-red-100 text-red-700 border border-red-300 rounded hover:bg-red-200"
+                    className="px-2 py-1 text-xs bg-red-100 text-red-700 border border-red-300 rounded hover:bg-red-200"
                   >
                     🗑️ Supprimer
                   </button>
