@@ -1,10 +1,15 @@
 "use client";
 
-import { Item } from "@/types"; // ✅ on réutilise le même type
+import { Item } from "@/types";
 
 type Props = {
   items: Item[];
 };
+
+// utilitaire pour mettre une majuscule au début
+function capitalize(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
 
 export default function ActivitiesLayout({ items }: Props) {
   const grouped = items.reduce((acc: Record<string, Item[]>, item) => {
@@ -24,18 +29,25 @@ export default function ActivitiesLayout({ items }: Props) {
     <div className="max-w-4xl mx-auto px-4 space-y-10">
       {sortedDates.map((dateStr) => {
         const date = new Date(dateStr);
-        const formatted = date.toLocaleDateString("fr-FR", {
-          weekday: "long",
-          day: "numeric",
-          month: "long",
-        });
+        const formatted = capitalize(
+          date.toLocaleDateString("fr-FR", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+          })
+        );
 
         return (
           <div key={dateStr}>
-            <h2 className="text-2xl font-bold text-green-800 mb-6 border-b pb-2">
-              📅 {formatted}
+            {/* Titre jour */}
+            <h2 className="text-xl md:text-2xl font-bold text-green-800 mb-6 border-b border-green-200 pb-2 flex items-center gap-2">
+              <span role="img" aria-label="calendar">
+                📅
+              </span>
+              {formatted}
             </h2>
 
+            {/* Liste activités */}
             <div className="grid md:grid-cols-2 gap-6">
               {grouped[dateStr].map((item) => {
                 const d = item.date ? new Date(item.date) : null;
@@ -49,21 +61,21 @@ export default function ActivitiesLayout({ items }: Props) {
                 return (
                   <div
                     key={item.id}
-                    className="bg-white border border-green-200 rounded-xl p-5 shadow hover:shadow-md transition"
+                    className="bg-gradient-to-r from-green-50 to-green-100 shadow-sm rounded-xl p-6 hover:shadow-md transition"
                   >
                     <div className="flex justify-between items-center mb-2">
                       <h3 className="font-semibold text-lg text-gray-800">
                         {item.title}
                       </h3>
                       {timeStr && (
-                        <span className="text-green-700 font-bold text-sm">
+                        <span className="text-green-700 font-bold text-sm bg-white px-2 py-0.5 rounded-lg shadow-sm">
                           {timeStr}
                         </span>
                       )}
                     </div>
 
                     {item.extra && (
-                      <p className="text-sm text-gray-500 mb-1">📍 {item.extra}</p>
+                      <p className="text-sm text-gray-700 mb-1">📍 {item.extra}</p>
                     )}
                     {item.content && (
                       <p className="text-sm text-gray-600">{item.content}</p>

@@ -41,7 +41,7 @@ export default function MenuLayout({ items }: { items: any[] }) {
                     )}
                   </div>
                   {item.extra && (
-                    <span className="text-base md:text-lg font-bold text-green-700 bg-white rounded-full px-2 md:px-3 py-1 shadow">
+<span className="text-sm md:text-lg font-bold text-green-700">
                       {formatPrice(item.extra)}
                     </span>
                   )}

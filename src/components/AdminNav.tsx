@@ -8,25 +8,28 @@ export default function AdminNav() {
 
   const links = [
     { href: "/admin/sections", label: "⚙️ Sections" },
-    { href: "/admin/items", label: "📝 Contenus" },
-    { href: "/admin/comments", label: "📝 Commentaires" },
+    { href: "/admin/items", label: "📦 Contenus" },
+    { href: "/admin/comments", label: "💬 Commentaires" },
   ];
 
   return (
-    <nav className="flex gap-4 mb-6 border-b pb-2">
-      {links.map((link) => (
-        <Link
-          key={link.href}
-          href={link.href}
-          className={`px-3 py-1 rounded ${
-            pathname === link.href
-              ? "bg-green-600 text-white font-semibold"
-              : "text-green-700 hover:bg-green-100"
-          }`}
-        >
-          {link.label}
-        </Link>
-      ))}
+    <nav className="flex gap-2 mb-6 border-b border-gray-200 pb-2">
+      {links.map((link) => {
+        const isActive = pathname === link.href;
+        return (
+          <Link
+            key={link.href}
+            href={link.href}
+            className={`px-4 py-2 rounded-md text-sm transition-colors ${
+              isActive
+                ? "bg-green-600 text-white font-semibold shadow-sm"
+                : "text-green-700 hover:bg-green-50"
+            }`}
+          >
+            {link.label}
+          </Link>
+        );
+      })}
     </nav>
   );
 }

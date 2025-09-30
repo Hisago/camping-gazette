@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import EmojiPicker from "@/components/admin/EmojiPicker";
+import SectionPreview from "@/components/admin/SectionPreview";
 
 type Section = {
   id: number;
@@ -141,6 +142,7 @@ export default function AdminSectionsPage() {
               <option value="activities">Activités</option>
               <option value="cards">Cartes</option>
             </select>
+              <SectionPreview type={type} />
           </div>
         </div>
 
